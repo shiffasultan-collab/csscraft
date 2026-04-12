@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSSCraft — CSS Generator for Box Shadow, Gradient, Border Radius & More</title>
+<meta name="description" content="Free in-browser CSS generator. Create box shadows, gradients, border radius, text shadows, flexbox layouts and filters with live preview. Copy clean CSS instantly.">
+<style>
+  :root {
+    --bg:#0f1117;--surface:#1a1d27;--surface2:#22263a;--border:#2e3250;
+    --accent:#6c63ff;--accent2:#a78bfa;--text:#e2e8f0;--muted:#8892b0;
+    --success:#10b981;--warning:#f59e0b;--danger:#ef4444;
+    --radius:10px;--font:'Segoe UI',system-ui,sans-serif;--mono:'Fira Code','Cascadia Code','Consolas',monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;}
+  header{background:var(--surface);border-bottom:1px solid var(--border);padding:.7rem 1.4rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;}
+  .logo{display:flex;align-items:center;gap:.6rem;text-decoration:none;color:var(--text);}
+  .logo-icon{width:34px;height:34px;background:linear-gradient(135deg,#06b6d4,#a78bfa);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;}
+  .logo-text{font-size:1.15rem;font-weight:700;}.logo-text span{color:var(--accent2);}
+  nav{display:flex;gap:.8rem;align-items:center;flex-wrap:wrap;}
+  nav a{color:var(--muted);text-decoration:none;font-size:.82rem;padding:.25rem .5rem;border-radius:5px;transition:color .2s,background .2s;}
+  nav a:hover{color:var(--text);background:var(--surface2);}
+  .pro-badge{background:linear-gradient(135deg,var(--accent),var(--accent2));color:white;padding:.22rem .6rem;border-radius:20px;font-size:.72rem;font-weight:600;cursor:pointer;border:none;}
+  .hero{text-align:center;padding:1.6rem 1rem .9rem;}
+  .hero h1{font-size:clamp(1.4rem,3.5vw,2rem);font-weight:800;margin-bottom:.3rem;}
+  .hero h1 span{background:linear-gradient(135deg,#06b6d4,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+  .hero p{color:var(--muted);font-size:.9rem;max-width:480px;margin:0 auto .8rem;}
+  .badges{display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;}
+  .badge{background:var(--surface2);border:1px solid var(--border);padding:.18rem .55rem;border-radius:20px;font-size:.72rem;color:var(--muted);}
+  .container{max-width:1200px;margin:0 auto;padding:0 1rem 2rem;}
+  .tab-bar{display:flex;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius) var(--radius) 0 0;overflow:hidden;flex-wrap:wrap;}
+  .tab{padding:.6rem 1rem;font-size:.83rem;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;background:none;border-top:none;border-left:none;border-right:none;transition:color .2s,background .2s;white-space:nowrap;}
+  .tab:hover{color:var(--text);background:var(--surface2);}
+  .tab.active{color:var(--accent2);border-bottom:2px solid var(--accent);background:var(--surface2);}
+  .tab-content{border:1px solid var(--border);border-top:none;border-radius:0 0 var(--radius) var(--radius);background:var(--surface);}
+  .tab-pane{display:none;padding:1.2rem;}
+  .tab-pane.active{display:block;}
+
+  /* Generator layout */
+  .gen-layout{display:grid;grid-template-columns:320px 1fr;gap:1.2rem;align-items:start;}
+  @media(max-width:700px){.gen-layout{grid-template-columns:1fr;}}
+  .controls-panel{display:flex;flex-direction:column;gap:.7rem;}
+  .ctrl-group{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:.75rem .9rem;}
+  .ctrl-group h4{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.55rem;}
+  .ctrl-row{display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-bottom:.4rem;}
+  .ctrl-row:last-child{margin-bottom:0;}
+  .ctrl-row label{font-size:.8rem;color:var(--text);flex:1;white-space:nowrap;}
+  .ctrl-row input[type=range]{flex:2;accent-color:var(--accent);}
+  .ctrl-row input[type=color]{width:36px;height:26px;border:1px solid var(--border);border-radius:5px;cursor:pointer;background:none;padding:0;}
+  .ctrl-row input[type=number], .ctrl-row select{background:var(--bg);border:1px solid var(--border);border-radius:5px;color:var(--text);padding:.2rem .4rem;font-size:.78rem;outline:none;width:70px;}
+  .ctrl-row select{width:auto;}
+  .val-label{font-family:var(--mono);font-size:.75rem;color:var(--accent2);min-width:38px;text-align:right;}
+  .ctrl-row input[type=checkbox]{accent-color:var(--accent);}
+
+  /* Preview */
+  .preview-panel{display:flex;flex-direction:column;gap:.8rem;}
+  .preview-box{background:var(--surface2);border:1px solid var(--border);border-radius:10px;display:flex;align-items:center;justify-content:center;min-height:220px;overflow:hidden;position:relative;}
+  .preview-el{width:140px;height:100px;background:#6c63ff;border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-size:.82rem;font-weight:600;transition:all .15s;}
+  .preview-bg-el{width:100%;height:220px;display:flex;align-items:center;justify-content:center;color:white;font-size:.95rem;font-weight:600;text-shadow:0 1px 3px rgba(0,0,0,.5);}
+
+  /* CSS output */
+  .css-out-box{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:.7rem .9rem;position:relative;}
+  .css-out-pre{font-family:var(--mono);font-size:.8rem;color:var(--accent2);line-height:1.6;white-space:pre-wrap;word-break:break-all;}
+  .css-out-actions{display:flex;gap:.4rem;margin-top:.5rem;flex-wrap:wrap;}
+  .css-copy-btn{background:var(--accent);color:white;border:none;border-radius:6px;padding:.3rem .8rem;font-size:.78rem;font-weight:600;cursor:pointer;transition:opacity .2s;}
+  .css-copy-btn:hover{opacity:.85;}
+  .css-copy-btn.copied{background:var(--success);}
+
+  /* Footer */
+  .footer-links{display:flex;gap:.7rem;justify-content:center;flex-wrap:wrap;padding:1rem;border-top:1px solid var(--border);margin-top:1.5rem;}
+  .footer-links a{color:var(--muted);text-decoration:none;font-size:.75rem;transition:color .2s;}
+  .footer-links a:hover{color:var(--accent2);}
+  .footer-links a.current{color:var(--accent2);font-weight:600;}
+  .toast{position:fixed;bottom:1.2rem;right:1.2rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:.5rem .9rem;font-size:.82rem;color:var(--text);box-shadow:0 4px 20px rgba(0,0,0,.4);z-index:999;opacity:0;transform:translateY(8px);transition:opacity .3s,transform .3s;pointer-events:none;}
+  .toast.show{opacity:1;transform:none;}
+  .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;align-items:center;justify-content:center;}
+  .modal-bg.open{display:flex;}
+  .modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.8rem;max-width:380px;width:90%;text-align:center;}
+  .modal h2 span{color:var(--accent2);}
+  .modal p{color:var(--muted);font-size:.88rem;margin:.4rem 0 1rem;}
+  .modal ul{text-align:left;list-style:none;padding:0;margin:0 0 1.2rem;display:flex;flex-direction:column;gap:.35rem;}
+  .modal ul li::before{content:'✓ ';color:var(--success);font-weight:700;}
+  .modal ul li{font-size:.83rem;color:var(--muted);}
+  .modal .cta{background:linear-gradient(135deg,#06b6d4,var(--accent2));color:white;border:none;border-radius:8px;padding:.7rem 1.4rem;font-size:.95rem;font-weight:700;cursor:pointer;width:100%;margin-bottom:.4rem;}
+  .modal .close-modal{background:none;border:none;color:var(--muted);font-size:.78rem;cursor:pointer;}
+</style>
+</head>
+<body>
+<header>
+  <a class="logo" href="#"><span class="logo-icon">🎨</span><span class="logo-text">CSS<span>Craft</span></span></a>
+  <nav>
+    <a href="https://shiffasultan-collab.github.io/colorcraft/" target="_blank">ColorCraft</a>
+    <a href="https://shiffasultan-collab.github.io/markdowncraft/" target="_blank">MarkdownCraft</a>
+    <a href="https://shiffasultan-collab.github.io/numbercraft/" target="_blank">NumberCraft</a>
+    <a href="https://shiffasultan-collab.github.io/sqlcraft/" target="_blank">SQLCraft</a>
+    <a href="https://shiffasultan-collab.github.io/jsoncraft/" target="_blank">JSONCraft</a>
+    <button class="pro-badge" onclick="openModal()">✨ Pro — $4/mo</button>
+  </nav>
+</header>
+<div class="hero">
+  <h1>CSS<span>Craft</span></h1>
+  <p>Generate pixel-perfect CSS visually. Box shadows, gradients, border radius, filters — live preview, copy clean CSS instantly.</p>
+  <div class="badges">
+    <span class="badge">🔒 100% Client-Side</span>
+    <span class="badge">🌑 Box Shadow</span>
+    <span class="badge">🌈 Gradient</span>
+    <span class="badge">⬛ Border Radius</span>
+    <span class="badge">🔲 Filter</span>
+    <span class="badge">⚡ Flexbox</span>
+  </div>
+</div>
+<div class="container">
+  <div class="tab-bar">
+    <button class="tab active" onclick="switchTab('shadow')" id="tab-shadow">🌑 Box Shadow</button>
+    <button class="tab" onclick="switchTab('gradient')" id="tab-gradient">🌈 Gradient</button>
+    <button class="tab" onclick="switchTab('radius')" id="tab-radius">⬛ Border Radius</button>
+    <button class="tab" onclick="switchTab('filter')" id="tab-filter">🔲 Filter</button>
+    <button class="tab" onclick="switchTab('flexbox')" id="tab-flexbox">⚡ Flexbox</button>
+    <button class="tab" onclick="switchTab('textshadow')" id="tab-textshadow">✍️ Text Shadow</button>
+  </div>
+  <div class="tab-content">
+
+    <!-- Box Shadow -->
+    <div class="tab-pane active" id="pane-shadow">
+      <div class="gen-layout">
+        <div class="controls-panel">
+          <div class="ctrl-group">
+            <h4>Shadow Settings</h4>
+            <div class="ctrl-row"><label>Horizontal</label><input type="range" id="sh-x" min="-50" max="50" value="4" oninput="updateShadow()"><span class="val-label" id="sh-x-v">4px</span></div>
+            <div class="ctrl-row"><label>Vertical</label><input type="range" id="sh-y" min="-50" max="50" value="4" oninput="updateShadow()"><span class="val-label" id="sh-y-v">4px</span></div>
+            <div class="ctrl-row"><label>Blur</label><input type="range" id="sh-blur" min="0" max="100" value="10" oninput="updateShadow()"><span class="val-label" id="sh-blur-v">10px</span></div>
+            <div class="ctrl-row"><label>Spread</label><input type="range" id="sh-spread" min="-50" max="50" value="0" oninput="updateShadow()"><span class="val-label" id="sh-spread-v">0px</span></div>
+            <div class="ctrl-row"><label>Opacity</label><input type="range" id="sh-opacity" min="0" max="100" value="40" oninput="updateShadow()"><span class="val-label" id="sh-opacity-v">40%</span></div>
+            <div class="ctrl-row"><label>Color</label><input type="color" id="sh-color" value="#000000" oninput="updateShadow()"></div>
+            <div class="ctrl-row"><label>Inset</label><input type="checkbox" id="sh-inset" onchange="updateShadow()"></div>
+          </div>
+          <div class="ctrl-group">
+            <h4>Element</h4>
+            <div class="ctrl-row"><label>BG Color</label><input type="color" id="sh-bg" value="#6c63ff" oninput="updateShadow()"></div>
+            <div class="ctrl-row"><label>Width</label><input type="range" id="sh-w" min="60" max="300" value="140" oninput="updateShadow()"><span class="val-label" id="sh-w-v">140px</span></div>
+            <div class="ctrl-row"><label>Height</label><input type="range" id="sh-h" min="40" max="200" value="100" oninput="updateShadow()"><span class="val-label" id="sh-h-v">100px</span></div>
+          </div>
+        </div>
+        <div class="preview-panel">
+          <div class="preview-box"><div class="preview-el" id="sh-preview">Element</div></div>
+          <div class="css-out-box"><pre class="css-out-pre" id="sh-css"></pre>
+          <div class="css-out-actions">
+            <button class="css-copy-btn" id="sh-copy-btn" onclick="copyCss('sh-css','sh-copy-btn')">Copy CSS</button>
+          </div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gradient -->
+    <div class="tab-pane" id="pane-gradient">
+      <div class="gen-layout">
+        <div class="controls-panel">
+          <div class="ctrl-group">
+            <h4>Gradient Type</h4>
+            <div class="ctrl-row"><label>Type</label><select id="grad-type" onchange="updateGradient()"><option value="linear">Linear</option><option value="radial">Radial</option><option value="conic">Conic</option></select></div>
+            <div class="ctrl-row"><label>Angle</label><input type="range" id="grad-angle" min="0" max="360" value="135" oninput="updateGradient();document.getElementById('grad-angle-v').textContent=this.value+'°'"><span class="val-label" id="grad-angle-v">135°</span></div>
+          </div>
+          <div class="ctrl-group">
+            <h4>Color Stops</h4>
+            <div id="gradStops"></div>
+            <button onclick="addGradStop()" style="background:var(--surface);border:1px dashed var(--border);color:var(--muted);border-radius:6px;padding:.3rem .7rem;font-size:.78rem;cursor:pointer;width:100%;margin-top:.4rem;transition:border-color .2s" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">+ Add Stop</button>
+          </div>
+        </div>
+        <div class="preview-panel">
+          <div class="preview-box" style="padding:0"><div class="preview-bg-el" id="grad-preview">Gradient Preview</div></div>
+          <div class="css-out-box"><pre class="css-out-pre" id="grad-css"></pre>
+          <div class="css-out-actions"><button class="css-copy-btn" id="grad-copy-btn" onclick="copyCss('grad-css','grad-copy-btn')">Copy CSS</button></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Border Radius -->
+    <div class="tab-pane" id="pane-radius">
+      <div class="gen-layout">
+        <div class="controls-panel">
+          <div class="ctrl-group">
+            <h4>Corners</h4>
+            <div class="ctrl-row"><label>Link all</label><input type="checkbox" id="br-link" checked onchange="updateRadius()"></div>
+            <div class="ctrl-row"><label>Top-Left</label><input type="range" id="br-tl" min="0" max="100" value="8" oninput="updateRadius()"><span class="val-label" id="br-tl-v">8px</span></div>
+            <div class="ctrl-row"><label>Top-Right</label><input type="range" id="br-tr" min="0" max="100" value="8" oninput="updateRadius()"><span class="val-label" id="br-tr-v">8px</span></div>
+            <div class="ctrl-row"><label>Bottom-Right</label><input type="range" id="br-br" min="0" max="100" value="8" oninput="updateRadius()"><span class="val-label" id="br-br-v">8px</span></div>
+            <div class="ctrl-row"><label>Bottom-Left</label><input type="range" id="br-bl" min="0" max="100" value="8" oninput="updateRadius()"><span class="val-label" id="br-bl-v">8px</span></div>
+            <div class="ctrl-row"><label>Unit</label><select id="br-unit" onchange="updateRadius()"><option value="px">px</option><option value="%">%</option></select></div>
+          </div>
+          <div class="ctrl-group">
+            <h4>Element</h4>
+            <div class="ctrl-row"><label>BG Color</label><input type="color" id="br-bg" value="#6c63ff" oninput="updateRadius()"></div>
+            <div class="ctrl-row"><label>Width</label><input type="range" id="br-w" min="60" max="300" value="160" oninput="updateRadius()"><span class="val-label" id="br-w-v">160px</span></div>
+            <div class="ctrl-row"><label>Height</label><input type="range" id="br-h" min="40" max="300" value="120" oninput="updateRadius()"><span class="val-label" id="br-h-v">120px</span></div>
+          </div>
+        </div>
+        <div class="preview-panel">
+          <div class="preview-box"><div class="preview-el" id="br-preview" style="background:#6c63ff;width:160px;height:120px">Element</div></div>
+          <div class="css-out-box"><pre class="css-out-pre" id="br-css"></pre>
+          <div class="css-out-actions"><button class="css-copy-btn" id="br-copy-btn" onclick="copyCss('br-css','br-copy-btn')">Copy CSS</button></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filter -->
+    <div class="tab-pane" id="pane-filter">
+      <div class="gen-layout">
+        <div class="controls-panel">
+          <div class="ctrl-group">
+            <h4>CSS Filters</h4>
+            <div class="ctrl-row"><label>Blur</label><input type="range" id="f-blur" min="0" max="20" value="0" step=".5" oninput="updateFilter()"><span class="val-label" id="f-blur-v">0px</span></div>
+            <div class="ctrl-row"><label>Brightness</label><input type="range" id="f-bright" min="0" max="300" value="100" oninput="updateFilter()"><span class="val-label" id="f-bright-v">100%</span></div>
+            <div class="ctrl-row"><label>Contrast</label><input type="range" id="f-contrast" min="0" max="300" value="100" oninput="updateFilter()"><span class="val-label" id="f-contrast-v">100%</span></div>
+            <div class="ctrl-row"><label>Grayscale</label><input type="range" id="f-gray" min="0" max="100" value="0" oninput="updateFilter()"><span class="val-label" id="f-gray-v">0%</span></div>
+            <div class="ctrl-row"><label>Hue Rotate</label><input type="range" id="f-hue" min="0" max="360" value="0" oninput="updateFilter()"><span class="val-label" id="f-hue-v">0deg</span></div>
+            <div class="ctrl-row"><label>Invert</label><input type="range" id="f-invert" min="0" max="100" value="0" oninput="updateFilter()"><span class="val-label" id="f-invert-v">0%</span></div>
+            <div class="ctrl-row"><label>Opacity</label><input type="range" id="f-opacity" min="0" max="100" value="100" oninput="updateFilter()"><span class="val-label" id="f-opacity-v">100%</span></div>
+            <div class="ctrl-row"><label>Saturate</label><input type="range" id="f-saturate" min="0" max="400" value="100" oninput="updateFilter()"><span class="val-label" id="f-saturate-v">100%</span></div>
+            <div class="ctrl-row"><label>Sepia</label><input type="range" id="f-sepia" min="0" max="100" value="0" oninput="updateFilter()"><span class="val-label" id="f-sepia-v">0%</span></div>
+            <button onclick="resetFilters()" style="background:var(--danger);color:white;border:none;border-radius:6px;padding:.3rem .8rem;font-size:.78rem;cursor:pointer;margin-top:.3rem">Reset</button>
+          </div>
+        </div>
+        <div class="preview-panel">
+          <div class="preview-box" style="background:#fff">
+            <img id="f-preview" src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=80" style="max-width:100%;max-height:220px;object-fit:cover" alt="preview">
+          </div>
+          <div class="css-out-box"><pre class="css-out-pre" id="f-css"></pre>
+          <div class="css-out-actions"><button class="css-copy-btn" id="f-copy-btn" onclick="copyCss('f-css','f-copy-btn')">Copy CSS</button></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Flexbox -->
+    <div class="tab-pane" id="pane-flexbox">
+      <div class="gen-layout">
+        <div class="controls-panel">
+          <div class="ctrl-group">
+            <h4>Flex Container</h4>
+            <div class="ctrl-row"><label>direction</label><select id="fx-dir" onchange="updateFlex()"><option>row</option><option>row-reverse</option><option>column</option><option>column-reverse</option></select></div>
+            <div class="ctrl-row"><label>justify-content</label><select id="fx-jc" onchange="updateFlex()"><option>flex-start</option><option>center</option><option>flex-end</option><option>space-between</option><option>space-around</option><option>space-evenly</option></select></div>
+            <div class="ctrl-row"><label>align-items</label><select id="fx-ai" onchange="updateFlex()"><option>stretch</option><option>flex-start</option><option>center</option><option>flex-end</option><option>baseline</option></select></div>
+            <div class="ctrl-row"><label>flex-wrap</label><select id="fx-wrap" onchange="updateFlex()"><option>nowrap</option><option>wrap</option><option>wrap-reverse</option></select></div>
+            <div class="ctrl-row"><label>gap</label><input type="range" id="fx-gap" min="0" max="40" value="8" oninput="updateFlex()"><span class="val-label" id="fx-gap-v">8px</span></div>
+          </div>
+          <div class="ctrl-group">
+            <h4>Items</h4>
+            <div class="ctrl-row"><label>Count</label><input type="range" id="fx-count" min="1" max="12" value="4" oninput="updateFlex()"><span class="val-label" id="fx-count-v">4</span></div>
+            <div class="ctrl-row"><label>flex-grow</label><input type="range" id="fx-grow" min="0" max="5" value="0" oninput="updateFlex()"><span class="val-label" id="fx-grow-v">0</span></div>
+            <div class="ctrl-row"><label>flex-shrink</label><input type="range" id="fx-shrink" min="0" max="5" value="1" oninput="updateFlex()"><span class="val-label" id="fx-shrink-v">1</span></div>
+          </div>
+        </div>
+        <div class="preview-panel">
+          <div class="preview-box" style="min-height:200px;padding:1rem;align-items:stretch;background:var(--bg)">
+            <div id="fx-preview" style="width:100%;display:flex;background:var(--surface2);border-radius:8px;padding:.5rem;min-height:180px;"></div>
+          </div>
+          <div class="css-out-box"><pre class="css-out-pre" id="fx-css"></pre>
+          <div class="css-out-actions"><button class="css-copy-btn" id="fx-copy-btn" onclick="copyCss('fx-css','fx-copy-btn')">Copy CSS</button></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Text Shadow -->
+    <div class="tab-pane" id="pane-textshadow">
+      <div class="gen-layout">
+        <div class="controls-panel">
+          <div class="ctrl-group">
+            <h4>Text Shadow</h4>
+            <div class="ctrl-row"><label>Horizontal</label><input type="range" id="ts-x" min="-20" max="20" value="2" oninput="updateTextShadow()"><span class="val-label" id="ts-x-v">2px</span></div>
+            <div class="ctrl-row"><label>Vertical</label><input type="range" id="ts-y" min="-20" max="20" value="2" oninput="updateTextShadow()"><span class="val-label" id="ts-y-v">2px</span></div>
+            <div class="ctrl-row"><label>Blur</label><input type="range" id="ts-blur" min="0" max="40" value="4" oninput="updateTextShadow()"><span class="val-label" id="ts-blur-v">4px</span></div>
+            <div class="ctrl-row"><label>Color</label><input type="color" id="ts-color" value="#000000" oninput="updateTextShadow()"></div>
+            <div class="ctrl-row"><label>Opacity</label><input type="range" id="ts-opacity" min="0" max="100" value="50" oninput="updateTextShadow()"><span class="val-label" id="ts-opacity-v">50%</span></div>
+          </div>
+          <div class="ctrl-group">
+            <h4>Text Style</h4>
+            <div class="ctrl-row"><label>Size</label><input type="range" id="ts-size" min="16" max="80" value="36" oninput="updateTextShadow()"><span class="val-label" id="ts-size-v">36px</span></div>
+            <div class="ctrl-row"><label>Color</label><input type="color" id="ts-text-color" value="#ffffff" oninput="updateTextShadow()"></div>
+            <div class="ctrl-row"><label>BG</label><input type="color" id="ts-bg" value="#1a1d27" oninput="updateTextShadow()"></div>
+          </div>
+        </div>
+        <div class="preview-panel">
+          <div class="preview-box" style="min-height:140px" id="ts-preview-box">
+            <div id="ts-preview" style="font-size:36px;font-weight:800;color:white">CSSCraft</div>
+          </div>
+          <div class="css-out-box"><pre class="css-out-pre" id="ts-css"></pre>
+          <div class="css-out-actions"><button class="css-copy-btn" id="ts-copy-btn" onclick="copyCss('ts-css','ts-copy-btn')">Copy CSS</button></div></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer-links">
+    <a href="https://shiffasultan-collab.github.io/csscraft/" class="current">🎨 CSSCraft</a>
+    <a href="https://shiffasultan-collab.github.io/numbercraft/" target="_blank">🔢 NumberCraft</a>
+    <a href="https://shiffasultan-collab.github.io/colorcraft/" target="_blank">🎨 ColorCraft</a>
+    <a href="https://shiffasultan-collab.github.io/sqlcraft/" target="_blank">🗄️ SQLCraft</a>
+    <a href="https://shiffasultan-collab.github.io/diffcraft/" target="_blank">⚡ DiffCraft</a>
+    <a href="https://shiffasultan-collab.github.io/markdowncraft/" target="_blank">📝 MarkdownCraft</a>
+    <a href="https://shiffasultan-collab.github.io/csvcraft/" target="_blank">📊 CSVCraft</a>
+    <a href="https://shiffasultan-collab.github.io/jsoncraft/" target="_blank">{ } JSONCraft</a>
+    <a href="https://shiffasultan-collab.github.io/jwtcraft/" target="_blank">🔑 JWTCraft</a>
+    <a href="https://shiffasultan-collab.github.io/hashcraft/" target="_blank"># HashCraft</a>
+    <a href="https://shiffasultan-collab.github.io/timecraft/" target="_blank">🕐 TimeCraft</a>
+    <a href="https://shiffasultan-collab.github.io/base64craft/" target="_blank">🔐 Base64Craft</a>
+  </div>
+</div>
+
+<div class="modal-bg" id="proModal">
+  <div class="modal">
+    <h2>🎨 CSSCraft <span>Pro</span></h2>
+    <p>For front-end devs and UI designers who craft daily.</p>
+    <ul>
+      <li>CSS Grid generator with visual builder</li>
+      <li>Animation & transition generator</li>
+      <li>Multi-layer box shadow composer</li>
+      <li>Save & organise CSS snippets</li>
+      <li>Export as CSS/SCSS/Tailwind config</li>
+    </ul>
+    <button class="cta" onclick="window.open('#gumroad','_blank')">Get Pro — $4/mo</button>
+    <button class="close-modal" onclick="closeModal()">No thanks</button>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+function toast(m){const e=document.getElementById('toast');e.textContent=m;e.className='toast show';setTimeout(()=>e.className='toast',2000);}
+function copyCss(id,btnId){
+  const text=document.getElementById(id).textContent;
+  navigator.clipboard.writeText(text).then(()=>{
+    const b=document.getElementById(btnId);b.classList.add('copied');b.textContent='✓ Copied!';
+    setTimeout(()=>{b.classList.remove('copied');b.textContent='Copy CSS';},1800);toast('CSS copied ✓');
+  });
+}
+function hexToRgba(hex,alpha){const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);return `rgba(${r},${g},${b},${alpha})`;}
+
+// Box Shadow
+function updateShadow(){
+  const x=document.getElementById('sh-x').value,y=document.getElementById('sh-y').value,
+    blur=document.getElementById('sh-blur').value,spread=document.getElementById('sh-spread').value,
+    op=(document.getElementById('sh-opacity').value/100).toFixed(2),
+    col=document.getElementById('sh-color').value,inset=document.getElementById('sh-inset').checked,
+    bg=document.getElementById('sh-bg').value,
+    w=document.getElementById('sh-w').value,h=document.getElementById('sh-h').value;
+  document.getElementById('sh-x-v').textContent=x+'px';document.getElementById('sh-y-v').textContent=y+'px';
+  document.getElementById('sh-blur-v').textContent=blur+'px';document.getElementById('sh-spread-v').textContent=spread+'px';
+  document.getElementById('sh-opacity-v').textContent=Math.round(op*100)+'%';
+  document.getElementById('sh-w-v').textContent=w+'px';document.getElementById('sh-h-v').textContent=h+'px';
+  const rgba=hexToRgba(col,op);
+  const shadow=`${inset?'inset ':''}${x}px ${y}px ${blur}px ${spread}px ${rgba}`;
+  const el=document.getElementById('sh-preview');
+  el.style.boxShadow=shadow;el.style.background=bg;el.style.width=w+'px';el.style.height=h+'px';
+  document.getElementById('sh-css').textContent=`.element {\n  box-shadow: ${shadow};\n}`;
+}
+
+// Gradient
+let gradStops=[{color:'#6c63ff',pos:0},{color:'#a78bfa',pos:100}];
+function initGradStops(){
+  const el=document.getElementById('gradStops');
+  el.innerHTML=gradStops.map((s,i)=>`
+    <div class="ctrl-row" style="gap:.3rem">
+      <input type="color" value="${s.color}" oninput="gradStops[${i}].color=this.value;updateGradient()" style="width:32px;height:26px;border:1px solid var(--border);border-radius:5px;cursor:pointer;background:none;padding:0">
+      <input type="range" min="0" max="100" value="${s.pos}" oninput="gradStops[${i}].pos=parseInt(this.value);document.getElementById('gp${i}v').textContent=this.value+'%';updateGradient()">
+      <span class="val-label" id="gp${i}v">${s.pos}%</span>
+      ${gradStops.length>2?`<button onclick="gradStops.splice(${i},1);initGradStops();updateGradient()" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:.85rem;padding:0">✕</button>`:''}
+    </div>`).join('');
+}
+function addGradStop(){gradStops.push({color:'#'+Math.floor(Math.random()*16777215).toString(16).padStart(6,'0'),pos:50});initGradStops();updateGradient();}
+function updateGradient(){
+  const type=document.getElementById('grad-type').value,angle=document.getElementById('grad-angle').value;
+  const stops=gradStops.map(s=>`${s.color} ${s.pos}%`).join(', ');
+  let css;
+  if(type==='linear') css=`linear-gradient(${angle}deg, ${stops})`;
+  else if(type==='radial') css=`radial-gradient(circle, ${stops})`;
+  else css=`conic-gradient(from ${angle}deg, ${stops})`;
+  document.getElementById('grad-preview').style.background=css;
+  document.getElementById('grad-css').textContent=`.element {\n  background: ${css};\n}`;
+}
+
+// Border Radius
+function updateRadius(){
+  const link=document.getElementById('br-link').checked;
+  const tl=document.getElementById('br-tl').value;
+  if(link){['tr','br','bl'].forEach(c=>{document.getElementById('br-'+c).value=tl;document.getElementById('br-'+c+'-v').textContent=tl+document.getElementById('br-unit').value;});}
+  const unit=document.getElementById('br-unit').value;
+  const vals=['tl','tr','br','bl'].map(c=>{const v=document.getElementById('br-'+c).value;document.getElementById('br-'+c+'-v').textContent=v+unit;return v+unit;});
+  const all=vals.every(v=>v===vals[0]);
+  const r=all?vals[0]:vals.join(' ');
+  const el=document.getElementById('br-preview');
+  const bg=document.getElementById('br-bg').value,w=document.getElementById('br-w').value,h=document.getElementById('br-h').value;
+  document.getElementById('br-w-v').textContent=w+'px';document.getElementById('br-h-v').textContent=h+'px';
+  el.style.borderRadius=r;el.style.background=bg;el.style.width=w+'px';el.style.height=h+'px';
+  document.getElementById('br-css').textContent=`.element {\n  border-radius: ${r};\n}`;
+}
+
+// Filter
+function updateFilter(){
+  const vals={blur:['f-blur','px'],bright:['f-bright','%'],contrast:['f-contrast','%'],gray:['f-gray','%'],hue:['f-hue','deg'],invert:['f-invert','%'],opacity:['f-opacity','%'],saturate:['f-saturate','%'],sepia:['f-sepia','%']};
+  const parts=[];
+  for(const[k,[id,unit]] of Object.entries(vals)){
+    const v=document.getElementById(id).value;
+    document.getElementById('f-'+k+'-v').textContent=v+unit;
+    const def={blur:0,bright:100,contrast:100,gray:0,hue:0,invert:0,opacity:100,saturate:100,sepia:0}[k];
+    if(parseFloat(v)!==def) parts.push(`${k==='bright'?'brightness':k==='gray'?'grayscale':k==='hue'?'hue-rotate':k==='saturate'?'saturate':k}(${v}${unit})`);
+  }
+  const f=parts.length?parts.join(' '):'none';
+  document.getElementById('f-preview').style.filter=f;
+  document.getElementById('f-css').textContent=`.element {\n  filter: ${f};\n}`;
+}
+function resetFilters(){
+  const defs={blur:0,bright:100,contrast:100,gray:0,hue:0,invert:0,opacity:100,saturate:100,sepia:0};
+  for(const[k,v] of Object.entries(defs)) document.getElementById('f-'+k).value=v;
+  updateFilter();
+}
+
+// Flexbox
+function updateFlex(){
+  const dir=document.getElementById('fx-dir').value,jc=document.getElementById('fx-jc').value,
+    ai=document.getElementById('fx-ai').value,wrap=document.getElementById('fx-wrap').value,
+    gap=document.getElementById('fx-gap').value,count=document.getElementById('fx-count').value,
+    grow=document.getElementById('fx-grow').value,shrink=document.getElementById('fx-shrink').value;
+  document.getElementById('fx-gap-v').textContent=gap+'px';
+  document.getElementById('fx-count-v').textContent=count;
+  document.getElementById('fx-grow-v').textContent=grow;
+  document.getElementById('fx-shrink-v').textContent=shrink;
+  const preview=document.getElementById('fx-preview');
+  preview.style.cssText=`width:100%;display:flex;background:var(--surface2);border-radius:8px;padding:.5rem;min-height:160px;flex-direction:${dir};justify-content:${jc};align-items:${ai};flex-wrap:${wrap};gap:${gap}px`;
+  preview.innerHTML=Array.from({length:parseInt(count)},(_,i)=>`<div style="background:${['#6c63ff','#a78bfa','#10b981','#f59e0b','#ef4444','#06b6d4'][i%6]};border-radius:6px;padding:.5rem;color:white;font-size:.72rem;font-weight:600;min-width:32px;min-height:32px;display:flex;align-items:center;justify-content:center;flex-grow:${grow};flex-shrink:${shrink};">${i+1}</div>`).join('');
+  document.getElementById('fx-css').textContent=`.container {\n  display: flex;\n  flex-direction: ${dir};\n  justify-content: ${jc};\n  align-items: ${ai};\n  flex-wrap: ${wrap};\n  gap: ${gap}px;\n}\n.item {\n  flex: ${grow} ${shrink} auto;\n}`;
+}
+
+// Text Shadow
+function updateTextShadow(){
+  const x=document.getElementById('ts-x').value,y=document.getElementById('ts-y').value,
+    blur=document.getElementById('ts-blur').value,col=document.getElementById('ts-color').value,
+    op=(document.getElementById('ts-opacity').value/100).toFixed(2),
+    size=document.getElementById('ts-size').value,textCol=document.getElementById('ts-text-color').value,
+    bg=document.getElementById('ts-bg').value;
+  document.getElementById('ts-x-v').textContent=x+'px';document.getElementById('ts-y-v').textContent=y+'px';
+  document.getElementById('ts-blur-v').textContent=blur+'px';document.getElementById('ts-opacity-v').textContent=Math.round(op*100)+'%';
+  document.getElementById('ts-size-v').textContent=size+'px';
+  const rgba=hexToRgba(col,op);
+  const shadow=`${x}px ${y}px ${blur}px ${rgba}`;
+  const el=document.getElementById('ts-preview');
+  el.style.textShadow=shadow;el.style.fontSize=size+'px';el.style.color=textCol;
+  document.getElementById('ts-preview-box').style.background=bg;
+  document.getElementById('ts-css').textContent=`.element {\n  text-shadow: ${shadow};\n  font-size: ${size}px;\n  color: ${textCol};\n}`;
+}
+
+// Tabs
+function switchTab(name){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  document.getElementById('pane-'+name).classList.add('active');
+}
+function openModal(){document.getElementById('proModal').classList.add('open');}
+function closeModal(){document.getElementById('proModal').classList.remove('open');}
+document.getElementById('proModal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal();});
+
+// Init
+initGradStops();updateShadow();updateGradient();updateRadius();updateFilter();updateFlex();updateTextShadow();
+</script>
+</body>
+</html>
