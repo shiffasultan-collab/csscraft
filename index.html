@@ -427,7 +427,8 @@ function updateFlex(){
   document.getElementById('fx-shrink-v').textContent=shrink;
   const preview=document.getElementById('fx-preview');
   preview.style.cssText=`width:100%;display:flex;background:var(--surface2);border-radius:8px;padding:.5rem;min-height:160px;flex-direction:${dir};justify-content:${jc};align-items:${ai};flex-wrap:${wrap};gap:${gap}px`;
-  preview.innerHTML=Array.from({length:parseInt(count)},(_,i)=>`<div style="background:${['#6c63ff','#a78bfa','#10b981','#f59e0b','#ef4444','#06b6d4'][i%6]};border-radius:6px;padding:.5rem;color:white;font-size:.72rem;font-weight:600;min-width:32px;min-height:32px;display:flex;align-items:center;justify-content:center;flex-grow:${grow};flex-shrink:${shrink};">${i+1}</div>`).join('');
+  preview.innerHTML=Array.from({length:parseInt(count)},(_,i)=>`<div style="background:${['#6c63ff','#a78bfa','#10b981','#f59e0b','#ef4444','#06b6d4'][i%6]};border-radius:6px;padding:.5rem;color:white;font-size:.72rem;font-weight:600;min-width:32px;min-height:32px;display:flex;align-items:center;justify-content:center;flex-grow:${grow};flex-shrink:${shrink};">${i+1}  <a href="https://shiffasultan-collab.github.io/uuidcraft/">UUIDCraft</a>
+</div>`).join('');
   document.getElementById('fx-css').textContent=`.container {\n  display: flex;\n  flex-direction: ${dir};\n  justify-content: ${jc};\n  align-items: ${ai};\n  flex-wrap: ${wrap};\n  gap: ${gap}px;\n}\n.item {\n  flex: ${grow} ${shrink} auto;\n}`;
 }
 
